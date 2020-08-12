@@ -5,14 +5,13 @@ import { Dataset, DatasetService, Column } from '../../service/dataset';
 import { CodeComponent } from '../copy_code';
 import Toast from '../toast';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
-import { StripedRows } from '../striped_rows';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import {
   LinearProgress,
   FormControl,
   MenuItem,
   Select,
   FormHelperText,
-  Grid,
   withStyles,
   TableCell,
   TableRow,
@@ -28,6 +27,12 @@ interface Props {
   dataset: Dataset;
 }
 
+const theme = createMuiTheme({
+  palette: {
+    type: 'dark',
+  },
+});
+
 interface State {
   isLoading: boolean;
   source: string;
@@ -39,17 +44,6 @@ interface State {
   budgetError: boolean;
   trainingResponse: boolean;
 }
-
-const TableHeadCell = withStyles({
-  root: {
-    backgroundColor: '#f8f9fa',
-    whiteSpace: 'nowrap',
-    fontSize: '13px',
-    padding: '4px 16px 4px 16px',
-    borderTop: '1px  solid var(--jp-border-color2)',
-    BASE_FONT,
-  },
-})(TableCell);
 
 const StyledTableCell = withStyles({
   root: {
@@ -66,20 +60,23 @@ const localStyles = stylesheet({
     margin: 0,
     padding: '12px 12px 12px 24px',
     fontFamily: 'Roboto',
+    color: 'var(--jp-ui-font-color1)',
   },
   title: {
     fontSize: '16px',
     letterSpacing: '1px',
     padding: '24px 0px 10px 8px',
     fontFamily: 'Roboto',
+    color: 'var(--jp-ui-font-color1)',
   },
   panel: {
-    backgroundColor: 'white',
+    // backgroundColor: 'white',
     height: '100%',
     ...csstips.vertical,
   },
   paper: {
     paddingLeft: '16px',
+    paddingRight: '16px',
     textAlign: 'left',
     fontSize: 'var(--jp-ui-font-size1)',
   },
@@ -222,149 +219,165 @@ ${columnString} }
       return <LinearProgress />;
     } else {
       return (
-        <div className={localStyles.panel}>
-          <ul className={localStyles.list}>
-            <header className={localStyles.header}>
-              {this.props.dataset.displayName}
-            </header>
-            <div className={localStyles.paper}>
-              <Grid item xs={9}>
-                <div className={localStyles.title}>Dataset Info</div>
-                <StripedRows
-                  rows={[
-                    {
-                      name: 'Created',
-                      value: this.props.dataset.createTime.toLocaleString(),
-                    },
-                    {
-                      name: 'Total columns',
-                      value: columns.length,
-                    },
-                    {
-                      name: 'Dataset location',
-                      value: source,
-                    },
-                  ]}
-                />
-              </Grid>
-              <header className={localStyles.title}>Columns</header>
-              <Table
-                size="small"
-                style={{ width: 'auto', tableLayout: 'auto' }}
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableHeadCell>Field name</TableHeadCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {columns.map(column => {
-                    return (
-                      <TableRow key={column.fieldName}>
-                        <StyledTableCell>{column.fieldName}</StyledTableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-              <header className={localStyles.title}>
-                Train Model on Dataset
+        <ThemeProvider theme={theme}>
+          <div className={localStyles.panel}>
+            <ul className={localStyles.list}>
+              <header className={localStyles.header}>
+                {this.props.dataset.displayName}
               </header>
-              <p style={{ padding: '0px 0px 10px 8px' }}>
-                <i>
-                  Select the target column, type of model, optimization
-                  objective, and budget. Click button or run the generated code
-                  in a notebook cell to create a training pipeline.
-                </i>
-              </p>
-              <div style={{ paddingLeft: '16px' }}>
-                <FormControl>
-                  <Select
-                    value={this.state.targetColumn}
-                    onChange={event => {
-                      this.setState({
-                        targetColumn: event.target.value as string,
-                      });
-                    }}
-                    displayEmpty
-                  >
-                    {columns.map(column => (
-                      <MenuItem key={column.fieldName} value={column.fieldName}>
-                        {column.fieldName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  <FormHelperText>Target column</FormHelperText>
-                </FormControl>
-                <FormControl style={{ paddingLeft: '24px' }}>
-                  <Select
-                    value={this.state.predictionType}
-                    onChange={event => {
-                      const predictionType = event.target.value as string;
-                      const objectives = this.getObjectivesForPredictionType(
-                        predictionType
+              <div className={localStyles.paper}>
+                <div className={localStyles.title}>Dataset Info</div>
+                <Table
+                  size="small"
+                  style={{ width: 'auto', tableLayout: 'auto' }}
+                >
+                  <TableBody>
+                    <TableRow>
+                      <StyledTableCell>Created</StyledTableCell>
+                      <StyledTableCell>
+                        {this.props.dataset.createTime.toLocaleString()}
+                      </StyledTableCell>
+                    </TableRow>
+                    <TableRow>
+                      <StyledTableCell>Total columns</StyledTableCell>
+                      <StyledTableCell>{columns.length}</StyledTableCell>
+                    </TableRow>
+                    <TableRow>
+                      <StyledTableCell>Dataset location</StyledTableCell>
+                      <StyledTableCell>{source}</StyledTableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+                <header className={localStyles.title}>Columns</header>
+                <Table
+                  size="small"
+                  style={{ width: 'auto', tableLayout: 'auto' }}
+                >
+                  <TableHead>
+                    <TableRow>
+                      <StyledTableCell>Field name</StyledTableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {columns.map(column => {
+                      return (
+                        <TableRow key={column.fieldName}>
+                          <StyledTableCell>{column.fieldName}</StyledTableCell>
+                        </TableRow>
                       );
-                      this.setState({ predictionType: predictionType });
-                      this.setState({ objective: objectives[0] });
-                    }}
-                    displayEmpty
-                    autoWidth={true}
-                  >
-                    <MenuItem value={'classification'}>
-                      {'classification'}
-                    </MenuItem>
-                    <MenuItem value={'regression'}>{'regression'}</MenuItem>
-                  </Select>
-                  <FormHelperText>Prediction type</FormHelperText>
-                </FormControl>
-                <FormControl style={{ paddingLeft: '24px' }}>
-                  <Select
-                    value={this.state.objective}
-                    onChange={event => {
-                      this.setState({
-                        objective: event.target.value as string,
-                      });
-                    }}
-                    displayEmpty
-                    autoWidth={true}
-                  >
-                    {this.getObjectivesForPredictionType(
-                      this.state.predictionType
-                    ).map(objective => (
-                      <MenuItem key={objective} value={objective}>
-                        {objective}
+                    })}
+                  </TableBody>
+                </Table>
+                <header className={localStyles.title}>
+                  Train Model on Dataset
+                </header>
+                <p
+                  style={{
+                    padding: '0px 0px 10px 8px',
+                    color: 'var(--jp-ui-font-color1)',
+                  }}
+                >
+                  <i>
+                    Select the target column, type of model, optimization
+                    objective, and budget. Click button or run the generated
+                    code in a notebook cell to create a training pipeline.
+                  </i>
+                </p>
+                <div style={{ paddingLeft: '16px' }}>
+                  <FormControl>
+                    <Select
+                      value={this.state.targetColumn}
+                      onChange={event => {
+                        this.setState({
+                          targetColumn: event.target.value as string,
+                        });
+                      }}
+                      displayEmpty
+                    >
+                      {columns.map(column => (
+                        <MenuItem
+                          key={column.fieldName}
+                          value={column.fieldName}
+                        >
+                          {column.fieldName}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    <FormHelperText>Target column</FormHelperText>
+                  </FormControl>
+                  <FormControl style={{ paddingLeft: '24px' }}>
+                    <Select
+                      value={this.state.predictionType}
+                      onChange={event => {
+                        const predictionType = event.target.value as string;
+                        const objectives = this.getObjectivesForPredictionType(
+                          predictionType
+                        );
+                        this.setState({ predictionType: predictionType });
+                        this.setState({ objective: objectives[0] });
+                      }}
+                      displayEmpty
+                      autoWidth={true}
+                    >
+                      <MenuItem value={'classification'}>
+                        {'classification'}
                       </MenuItem>
-                    ))}
-                  </Select>
-                  <FormHelperText>Objective</FormHelperText>
-                </FormControl>
-                <TextField
-                  style={{ paddingLeft: '24px', paddingTop: '3px', width: 50 }}
-                  error={this.state.budgetError}
-                  onChange={event => {
-                    let val = event.target.value;
-                    if (isNaN(parseInt(val))) {
-                      val = '1';
-                      this.setState({
-                        budget: val.toString(),
-                        budgetError: true,
-                      });
-                    } else {
-                      this.setState({
-                        budget: parseInt(val).toString(),
-                        budgetError: false,
-                      });
-                    }
-                  }}
-                  defaultValue={'1'}
-                  inputProps={{
-                    style: { fontSize: 'var(--jp-ui-font-size1)' },
-                  }}
-                  helperText="Budget"
-                />
-              </div>
-              <CodeComponent>
-                {`from jupyterlab_ucaip import create_training_pipeline
+                      <MenuItem value={'regression'}>{'regression'}</MenuItem>
+                    </Select>
+                    <FormHelperText>Prediction type</FormHelperText>
+                  </FormControl>
+                  <FormControl style={{ paddingLeft: '24px' }}>
+                    <Select
+                      value={this.state.objective}
+                      onChange={event => {
+                        this.setState({
+                          objective: event.target.value as string,
+                        });
+                      }}
+                      displayEmpty
+                      autoWidth={true}
+                    >
+                      {this.getObjectivesForPredictionType(
+                        this.state.predictionType
+                      ).map(objective => (
+                        <MenuItem key={objective} value={objective}>
+                          {objective}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    <FormHelperText>Objective</FormHelperText>
+                  </FormControl>
+                  <TextField
+                    style={{
+                      paddingLeft: '24px',
+                      paddingTop: '3px',
+                      width: 50,
+                    }}
+                    error={this.state.budgetError}
+                    onChange={event => {
+                      let val = event.target.value;
+                      if (isNaN(parseInt(val))) {
+                        val = '1';
+                        this.setState({
+                          budget: val.toString(),
+                          budgetError: true,
+                        });
+                      } else {
+                        this.setState({
+                          budget: parseInt(val).toString(),
+                          budgetError: false,
+                        });
+                      }
+                    }}
+                    defaultValue={'1'}
+                    inputProps={{
+                      style: { fontSize: 'var(--jp-ui-font-size1)' },
+                    }}
+                    helperText="Budget"
+                  />
+                </div>
+                <CodeComponent>
+                  {`from jupyterlab_ucaip import create_training_pipeline
 
 ${this.getBasicString()}
 
@@ -378,32 +391,33 @@ create_training_pipeline(
   budget_hours,
   transformations,
 )`}
-              </CodeComponent>
-              <Button
-                disabled={this.state.isLoading}
-                variant="contained"
-                color="primary"
-                size="small"
-                style={{ marginBottom: '16px' }}
-                onClick={this.trainModel}
-              >
-                Train Model
-              </Button>
-              <Portal>
-                <Toast
-                  open={this.state.trainingResponse}
-                  message={
-                    'Model is training. View training pipeline under training dropdown.'
-                  }
-                  onClose={() => {
-                    this.setState({ trainingResponse: false });
-                  }}
-                  autoHideDuration={6000}
-                />
-              </Portal>
-            </div>
-          </ul>
-        </div>
+                </CodeComponent>
+                <Button
+                  disabled={this.state.isLoading}
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  style={{ marginBottom: '16px' }}
+                  onClick={this.trainModel}
+                >
+                  Train Model
+                </Button>
+                <Portal>
+                  <Toast
+                    open={this.state.trainingResponse}
+                    message={
+                      'Model is training. View training pipeline under training dropdown.'
+                    }
+                    onClose={() => {
+                      this.setState({ trainingResponse: false });
+                    }}
+                    autoHideDuration={6000}
+                  />
+                </Portal>
+              </div>
+            </ul>
+          </div>
+        </ThemeProvider>
       );
     }
   }

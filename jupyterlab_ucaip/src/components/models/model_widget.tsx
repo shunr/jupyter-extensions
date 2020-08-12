@@ -77,7 +77,7 @@ const localStyles = stylesheet({
     height: '550px',
   },
   panel: {
-    backgroundColor: 'white',
+    // backgroundColor: 'white',
     height: '100%',
     ...csstips.vertical,
   },

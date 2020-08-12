@@ -158,6 +158,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
           <Button
             color="primary"
             size="small"
+            variant="contained"
             startIcon={<Icon>publish</Icon>}
             onClick={_ => {
               this.setState({ exportModelDialogOpen: true });
@@ -171,6 +172,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
           <Button
             color="primary"
             size="small"
+            variant="contained"
             startIcon={<Icon>add</Icon>}
             onClick={_ => {
               this.setState({ exportDatasetDialogOpen: true });
@@ -300,6 +302,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 rowData
               );
             }}
+            paging={true}
+            pageSize={20}
+            pageSizeOptions={[20]}
           />
         );
       case ResourceType.Training:
@@ -339,6 +344,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 rowData
               );
             }}
+            paging={true}
+            pageSize={20}
+            pageSizeOptions={[20]}
           />
         );
     }
@@ -348,7 +356,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     // TODO: Make styles separate
     return (
       <>
-        <Box height={1} width={1} bgcolor={'white'} borderRadius={0}>
+        <Box height={1} width={1} borderRadius={0}>
           <Toolbar variant="dense" style={styles.toolbar}>
             <ResourceSelect
               value={this.state.resourceType}

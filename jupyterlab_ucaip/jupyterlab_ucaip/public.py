@@ -53,6 +53,11 @@ def export_saved_model(display_name: str, model_path: str,
   return UCAIPService.get().export_saved_model(display_name, model_path,
                                                 framework)
 
+def deploy_model(model_id: str, machine_type: str,
+                 min_replicas: int = 1, endpoint_id: str = None):
+  return UCAIPService.get().deploy_model(model_id, machine_type,
+                                         min_replicas, endpoint_id)
+
 
 def predict(endpoint_id: str, instance: object):
   return UCAIPService.get().predict_tables(endpoint_id, instance)

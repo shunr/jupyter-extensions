@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Icon, Tooltip, IconButton, Portal } from '@material-ui/core';
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import { docco } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
+import { darcula } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import Toast from './toast';
 import { Clipboard } from '@jupyterlab/apputils';
 
@@ -22,7 +22,7 @@ export class CodeComponent extends React.Component<Props, null> {
   render() {
     return (
       <div style={{ position: 'relative' }}>
-        <SyntaxHighlighter language="python" style={docco} wrapLines={true}>
+        <SyntaxHighlighter language="python" style={darcula} wrapLines={true}>
           {this.props.children}
         </SyntaxHighlighter>
         <CopyCode
